@@ -1,14 +1,25 @@
-#pragma once
 #include <string>
-#include <iostream>
+
+#define MAX 100   // Maximum number of people
+#define DEG 10    // Maximum number of friends per person
 
 using namespace std;
 
-const int MAX = 100;     // Maximum number of people
-const int DEG = 20;      // Maximum number of friends per person
+class Graph {
+private:
+    string names[MAX];            // Names of all people
+    int graph[MAX][DEG];          // Adjacency list (list of friends)
+    int friendCount[MAX] = { 0 }; // Number of friends each person has
+    int personCount = 0;          // Number of unique people
 
-// Function to add a connection between two people
-void addConnection(const string& name1, const string& name2);
+    // Private method to return the index of a person, adding a new one if necessary
+    int getOrAddPersonIndex(const string& name);
 
-// Function to find all pairs connected through exactly 3 handshakes
-void findThreeHandshakePairs();
+public:
+    // Public method to add a connection (friendship) between two people
+    void addConnection(const string& name1, const string& name2);
+
+    // Public method to find and print all three-handshake pairs
+    void findThreeHandshakePairs();
+};
+

@@ -1,85 +1,90 @@
 #include "graph.h"
+#include <iostream>
 
-static string names[MAX];        // Names of all people
-static int graph[MAX][DEG];           // Adjacency list (list of friends)
-static int friendCount[MAX] = { 0 };    // Number of friends each person has
-static int personCount = 0;           // Number of unique people
+using namespace std;
 
-// Returns the index of a person, adding a new one if necessary
-static int getOrAddPersonIndex(const string& name) {
+// Private method to find or add a person to the graph
+// It returns the index of the person, or adds a new person if the name is not found
+int Graph::getOrAddPersonIndex(const string& name) {
+    // Search for the person in the list of names
     for (int i = 0; i < personCount; ++i) {
         if (names[i] == name)
-            return i;
+            return i; // Return the index if the person already exists
     }
+    // If the person doesn't exist, add them to the names list
     if (personCount < MAX) {
         names[personCount] = name;
-        return personCount++;
+        return personCount++; // Return the new index and increment the person count
     }
-    return -1; // Limit exceeded
+    return -1; // Return -1 if the maximum number of people has been reached
 }
 
-void addConnection(const string& name1, const string& name2) {
+// Public method to add a connection (friendship) between two people
+void Graph::addConnection(const string& name1, const string& name2) {
     int a = getOrAddPersonIndex(name1);
     int b = getOrAddPersonIndex(name2);
 
+    // Check for invalid cases: limit exceeded or trying to connect a person to themselves
     if (a == -1 || b == -1 || a == b)
-        return; // Limit exceeded or attempt to connect a person to themselves
+        return;
 
-    // Add connection a -> b, if not already present
+    // Add connection a -> b if not already present
     bool exists = false;
     for (int i = 0; i < friendCount[a]; ++i) {
         if (graph[a][i] == b) {
             exists = true;
-            break;
+            break; // If the connection exists, no need to add it again
         }
     }
     if (!exists && friendCount[a] < DEG)
-        graph[a][friendCount[a]++] = b;
+        graph[a][friendCount[a]++] = b; // Add b to a's friend list
 
-    // Add connection b -> a
+    // Add connection b -> a if not already present
     exists = false;
     for (int i = 0; i < friendCount[b]; ++i) {
         if (graph[b][i] == a) {
             exists = true;
-            break;
+            break; // If the connection exists, no need to add it again
         }
     }
     if (!exists && friendCount[b] < DEG)
-        graph[b][friendCount[b]++] = a;
+        graph[b][friendCount[b]++] = a; // Add a to b's friend list
 }
 
-void findThreeHandshakePairs() {
-    bool printed[MAX][MAX] = { {false} };
+// Public method to find and print all three-handshake pairs
+void Graph::findThreeHandshakePairs() {
+    bool printed[MAX][MAX] = { {false} }; // 2D array to track which pairs are already printed
 
+    // Iterate through each person in the graph
     for (int start = 0; start < personCount; ++start) {
-        int dist[MAX] = {};
-        for (int i = 0; i < MAX; ++i) dist[i] = -1;
+        int dist[MAX] = {}; // Array to store the distance of each person from 'start'
+        for (int i = 0; i < MAX; ++i) dist[i] = -1; // Initialize distances to -1 (unreachable)
 
-        int queue[MAX] = {};
+        int queue[MAX]{};  // Array to represent the queue for BFS
         int front = 0, back = 0;
+        dist[start] = 0;  // Distance to self is 0
+        queue[back++] = start; // Add the starting person to the queue
 
-        dist[start] = 0;
-        queue[back++] = start;
-
-        // BFS search up to depth 3
+        // Perform BFS up to a depth of 3
         while (front < back) {
             int u = queue[front++];
-            if (dist[u] >= 3) continue;
+            if (dist[u] >= 3) continue; // Stop if the distance exceeds 3
 
+            // Explore all friends of person 'u'
             for (int i = 0; i < friendCount[u]; ++i) {
                 int v = graph[u][i];
-                if (dist[v] == -1) {
-                    dist[v] = dist[u] + 1;
-                    queue[back++] = v;
+                if (dist[v] == -1) { // If person v is not yet visited
+                    dist[v] = dist[u] + 1; // Set distance to v
+                    queue[back++] = v; // Add v to the queue for further exploration
                 }
             }
         }
 
-        // Find pairs at exactly distance 3
+        // After BFS, check for pairs exactly at distance 3
         for (int i = 0; i < personCount; ++i) {
             if (dist[i] == 3 && start < i && !printed[start][i]) {
-                cout << names[start] << " - " << names[i] << endl;
-                printed[start][i] = printed[i][start] = true;
+                cout << names[start] << " - " << names[i] << endl; // Print the three-handshake pair
+                printed[start][i] = printed[i][start] = true; // Mark the pair as printed
             }
         }
     }

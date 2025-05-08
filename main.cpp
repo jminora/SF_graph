@@ -1,14 +1,17 @@
+#include <iostream>
 #include "graph.h"
 
 int main() {
-    // Example friendship network
-    addConnection("Oleg", "Nikita");
-    addConnection("Nikita", "Nastya");
-    addConnection("Nastya", "Ivan");
-    addConnection("Ivan", "Eugene");
+    Graph g; // Create a new graph object
 
-    cout << "Pairs connected through exactly three handshakes:\n";
-    findThreeHandshakePairs(); // Call the function to find pairs connected through three handshakes
+    // Example of adding connections (friendships)
+    g.addConnection("Oleg", "Nikita");
+    g.addConnection("Nikita", "Nastya");
+    g.addConnection("Nastya", "Ivan");
+    g.addConnection("Ivan", "Eugene");
+
+    // Find and print all three-handshake pairs
+    g.findThreeHandshakePairs();
 
     return 0;
 }
